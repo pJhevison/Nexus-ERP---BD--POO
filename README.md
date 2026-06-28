@@ -1,118 +1,85 @@
 # Nexus ERP Telecom
 
-## Aluno: Pedro Jhevison
-Sistema ERP de telecomunicacoes desenvolvido para a disciplina de Programacao Orientada a Objetos.
+Sistema ERP de telecomunicações desenvolvido para a disciplina de **Programação Orientada a Objetos**.
+
+| Informação | Descrição |
+|---|---|
+| Projeto | Nexus ERP Telecom |
+| Aluno | Pedro Jhevison |
+| Disciplina | Programação Orientada a Objetos |
+| Tema | ERP para empresas de telecomunicações |
+| Banco de dados | PostgreSQL |
+| Interface | Terminal |
+
+## Descrição do sistema
+
+O Nexus ERP Telecom é um sistema acadêmico desenvolvido para representar parte da estrutura de um ERP voltado para empresas de telecomunicações.
+
+O sistema utiliza conceitos de Programação Orientada a Objetos em Python e realiza persistência de dados em um banco relacional PostgreSQL.
+
+A versão inicial implementa o CRUD completo da entidade **Cliente**, permitindo cadastrar, listar, buscar, editar e excluir clientes. Além disso, o projeto contém as demais entidades previstas no Modelo ER, como planos, contratos, faturas, ordens de serviço, funcionários e o relacionamento de atendimento entre funcionário e ordem de serviço.
+
+## Tecnologias utilizadas
+
+| Tecnologia | Finalidade |
+|---|---|
+| Python 3.12 | Linguagem principal do sistema |
+| PostgreSQL | Banco de dados relacional |
+| psycopg2-binary | Biblioteca de conexão entre Python e PostgreSQL |
+| PowerShell / Terminal | Execução do sistema |
+| VS Code | Ambiente de desenvolvimento |
+| pgAdmin | Administração e visualização do banco de dados |
+
+O projeto não utiliza framework web, ORM ou SQLAlchemy. A comunicação com o banco é feita diretamente com SQL por meio da biblioteca `psycopg2`.
+
+## Estrutura do projeto
+
+| Caminho | Responsabilidade |
+|---|---|
+| `main.py` | Ponto de entrada do sistema |
+| `models/` | Classes de domínio do sistema |
+| `repositories/` | Camada de acesso ao banco de dados |
+| `services/` | Regras de negócio |
+| `ui/` | Menu textual e interação com o usuário |
+| `database/` | Conexão com PostgreSQL e script SQL |
+| `database/schema.sql` | Criação das tabelas do banco |
+| `requirements.txt` | Dependências do projeto |
+| `executar.bat` | Execução facilitada no Windows |
 
 ## Banco de dados
 
-O banco PostgreSQL não é entregue como arquivo físico. O projeto possui o arquivo `database/schema.sql`, responsável pela criação das tabelas, e a função `criar_tabelas()` em `database/connection.py`, chamada automaticamente ao iniciar o sistema.
+O banco PostgreSQL não é entregue como arquivo físico. O projeto contém o arquivo `database/schema.sql`, responsável pela criação das tabelas, e a função `criar_tabelas()` em `database/connection.py`, chamada automaticamente ao iniciar o sistema.
 
-Para executar em outro computador, basta criar um banco vazio chamado `nexus_erp`, instalar as dependências e executar `python main.py`. O sistema solicitará a senha do PostgreSQL e criará as tabelas automaticamente.
+Para executar o projeto em outro computador, basta criar um banco vazio chamado `nexus_erp`, instalar as dependências e executar o sistema. Na inicialização, o programa solicita a senha do PostgreSQL e cria automaticamente as tabelas, caso elas ainda não existam.
 
+| Item | Descrição |
+|---|---|
+| Nome padrão do banco | `nexus_erp` |
+| Usuário padrão | `postgres` |
+| Host padrão | `localhost` |
+| Porta padrão | `5432` |
+| Script de criação | `database/schema.sql` |
+| Criação automática | Realizada ao executar `main.py` |
 
-## Tecnologias
+As variáveis usadas pela conexão podem ser configuradas no ambiente, mas o sistema já possui valores padrão para facilitar a execução local.
 
-- Python 3.12
-- PostgreSQL
-- psycopg2-binary
-- Interface em terminal
-- Sem frameworks externos, sem ORM e sem SQLAlchemy
+| Variável | Valor padrão |
+|---|---|
+| `DB_NAME` | `nexus_erp` |
+| `DB_USER` | `postgres` |
+| `DB_HOST` | `localhost` |
+| `DB_PORT` | `5432` |
+| `DB_PASSWORD` | Solicitada ao executar o sistema |
 
-## Estrutura de pastas
+## Execução do sistema
 
-- `main.py`: ponto de entrada da aplicacao.
-- `models/`: classes do dominio.
-- `repositories/`: acesso ao banco com psycopg2.
-- `services/`: regras de negocio.
-- `ui/`: menu textual e interacao com o usuario.
-- `database/`: conexao PostgreSQL e schema SQL.
+Antes de executar, crie no pgAdmin um banco de dados vazio chamado `nexus_erp`.
 
-## Configuracao do banco
+### Execução pelo terminal ou VS Code
 
-Crie um banco PostgreSQL chamado `nexus_erp` ou configure outro nome por variavel de ambiente.
-
-Valores padrao usados em `database/connection.py`:
-
-- `DB_NAME=nexus_erp`
-- `DB_USER=postgres`
-- `DB_HOST=localhost`
-- `DB_PORT=5432`
-
-Se `DB_PASSWORD` nao estiver definida, o sistema solicita a senha do PostgreSQL automaticamente ao executar `main.py`.
-
-Exemplo no PowerShell:
-
-```powershell
-$env:DB_NAME="nexus_erp"
-$env:DB_USER="postgres"
-$env:DB_PASSWORD="sua_senha"
-$env:DB_HOST="localhost"
-$env:DB_PORT="5432"
-```
-
-As tabelas sao criadas automaticamente na inicializacao do sistema a partir de `database/schema.sql`.
-
-## Formas de execução
-
-### Forma 1: terminal / VS Code
-
-No PowerShell, entre na pasta do projeto, ative o ambiente virtual e execute o sistema:
+No PowerShell, entre na pasta do projeto, ative o ambiente virtual e execute o arquivo principal:
 
 ```powershell
 cd C:\Users\pedro\Documents\Nexus-ERP---BD--POO
 .\.venv\Scripts\Activate.ps1
 python main.py
-```
-
-Ao executar `python main.py`, o sistema pergunta `Senha do PostgreSQL:` automaticamente se `DB_PASSWORD` ainda nao estiver definida.
-
-No VS Code, abra `main.py` e use o botao Run. O sistema tambem perguntara a senha do PostgreSQL antes de criar/verificar as tabelas e abrir o menu.
-
-### Forma 2: execução facilitada no Windows
-
-1. Crie o banco `nexus_erp` no pgAdmin.
-2. De dois cliques em `executar.bat`.
-3. Informe a senha do PostgreSQL quando solicitado.
-
-O banco pode estar vazio no inicio. As tabelas sao criadas automaticamente pelo sistema a partir de `database/schema.sql`.
-
-Os dados cadastrados pelo menu sao persistidos no PostgreSQL. Para conferir os dados no pgAdmin, acesse `nexus_erp > Schemas > public > Tables > cliente` ou execute:
-
-```sql
-SELECT * FROM cliente;
-```
-
-## Funcionalidades da versao inicial
-
-- Cadastrar cliente.
-- Listar clientes.
-- Buscar cliente por CPF/CNPJ.
-- Editar cliente.
-- Excluir cliente.
-- Demonstrar polimorfismo entre `Cliente` e `Funcionario`.
-
-## Conceitos de POO aplicados
-
-- Classe abstrata: `Pessoa` em `models/pessoa.py`, usando `ABC` e `@abstractmethod`.
-- Heranca: `Cliente` e `Funcionario` herdam de `Pessoa`.
-- Encapsulamento: `Cliente` encapsula `cpf_cnpj` com atributo privado e property.
-- Polimorfismo: o menu chama `obter_identificacao()` em objetos `Cliente` e `Funcionario`.
-- Metodos de negocio: `ativar`, `inativar`, `atualizar_contato`, `alterar_cargo`, `reajustar_valor`, `resolver`.
-- `__str__`: implementado nas classes principais.
-- Tratamento de excecoes: menu e inicializacao capturam erros de validacao e conexao.
-
-## Aderencia ao Modelo ER
-
-O arquivo `database/schema.sql` cria exatamente as tabelas solicitadas:
-
-- `cliente`
-- `planos`
-- `contrato`
-- `fatura`
-- `os`
-- `funcionario`
-- `atende`
-
-A classe abstrata `Pessoa` existe apenas no codigo Python. Nao existe tabela `pessoa`, pois ela nao faz parte do Modelo ER.
-
-O relacionamento entre funcionario e O.S. foi implementado pela tabela associativa `atende`, com chave primaria composta por `id_func` e `id_os`.
