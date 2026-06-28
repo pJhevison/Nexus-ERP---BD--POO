@@ -3,6 +3,13 @@
 ## Aluno: Pedro Jhevison
 Sistema ERP de telecomunicacoes desenvolvido para a disciplina de Programacao Orientada a Objetos.
 
+## Banco de dados
+
+O banco PostgreSQL não é entregue como arquivo físico. O projeto possui o arquivo `database/schema.sql`, responsável pela criação das tabelas, e a função `criar_tabelas()` em `database/connection.py`, chamada automaticamente ao iniciar o sistema.
+
+Para executar em outro computador, basta criar um banco vazio chamado `nexus_erp`, instalar as dependências e executar `python main.py`. O sistema solicitará a senha do PostgreSQL e criará as tabelas automaticamente.
+
+
 ## Tecnologias
 
 - Python 3.12
