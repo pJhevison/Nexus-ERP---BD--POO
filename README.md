@@ -81,14 +81,13 @@ SELECT * FROM cliente;
 - Buscar cliente por CPF/CNPJ.
 - Editar cliente.
 - Excluir cliente.
-- Demonstrar polimorfismo entre `Cliente` e `Funcionario`.
 
-## Conceitos de POO aplicados
+## Fundamentos de Programacao Orientada a Objetos aplicados no projeto
 
 - Classe abstrata: `Pessoa` em `models/pessoa.py`, usando `ABC` e `@abstractmethod`.
 - Heranca: `Cliente` e `Funcionario` herdam de `Pessoa`.
 - Encapsulamento: `Cliente` encapsula `cpf_cnpj` com atributo privado e property.
-- Polimorfismo: o menu chama `obter_identificacao()` em objetos `Cliente` e `Funcionario`.
+- Polimorfismo: `Cliente` e `Funcionario` implementam `obter_identificacao()` de formas diferentes. Esse fundamento tecnico esta aplicado no codigo, mas nao aparece como funcionalidade do menu do ERP.
 - Metodos de negocio: `ativar`, `inativar`, `atualizar_contato`, `alterar_cargo`, `reajustar_valor`, `resolver`.
 - `__str__`: implementado nas classes principais.
 - Tratamento de excecoes: menu e inicializacao capturam erros de validacao e conexao.

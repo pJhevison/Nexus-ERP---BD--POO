@@ -1,7 +1,3 @@
-from models.cliente import Cliente
-from models.funcionario import Funcionario
-
-
 class MenuPrincipal:
     def __init__(self, cliente_service):
         self.cliente_service = cliente_service
@@ -21,8 +17,6 @@ class MenuPrincipal:
                 self._editar_cliente()
             elif opcao == "5":
                 self._excluir_cliente()
-            elif opcao == "6":
-                self._demonstrar_polimorfismo()
             elif opcao == "0":
                 print("Encerrando Nexus ERP Telecom.")
                 break
@@ -36,7 +30,6 @@ class MenuPrincipal:
         print("3 - Buscar cliente por CPF/CNPJ")
         print("4 - Editar cliente")
         print("5 - Excluir cliente")
-        print("6 - Demonstrar polimorfismo")
         print("0 - Sair")
 
     def _cadastrar_cliente(self):
@@ -102,13 +95,3 @@ class MenuPrincipal:
             print("Cliente excluido com sucesso.")
         except Exception as erro:
             print(f"Erro ao excluir cliente: {erro}")
-
-    def _demonstrar_polimorfismo(self):
-        pessoas = [
-            Cliente("Maria Silva", "12345678900", "92999990000", "Ativo"),
-            Funcionario("Joao Souza", "Tecnico de campo"),
-        ]
-
-        print("Mesmo metodo chamado em objetos Cliente e Funcionario:")
-        for pessoa in pessoas:
-            print(pessoa.obter_identificacao())
