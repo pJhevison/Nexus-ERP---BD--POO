@@ -447,8 +447,6 @@ O arquivo `database/schema.sql` cria as tabelas definidas no Modelo ER do sistem
 
 O relacionamento entre funcionário e ordem de serviço foi implementado pela tabela associativa `atende`, utilizando chave primária composta por `id_func` e `id_os`.
 
-## Observação sobre o banco local
-
-O banco utilizado na apresentação é local, criado no pgAdmin. O professor não precisa acessar diretamente o banco do computador do aluno.
+## Observação
 
 O projeto entrega o script `database/schema.sql` e a função Python de criação automática das tabelas, permitindo que a estrutura seja reproduzida em qualquer máquina com PostgreSQL instalado.
