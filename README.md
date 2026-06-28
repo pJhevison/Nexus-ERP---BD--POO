@@ -1,5 +1,6 @@
 # Nexus ERP Telecom
 
+## Aluno: Pedro Jhevison
 Sistema ERP de telecomunicacoes desenvolvido para a disciplina de Programacao Orientada a Objetos.
 
 ## Tecnologias
