@@ -1,9 +1,13 @@
 CREATE TABLE IF NOT EXISTS cliente (
     id_cliente SERIAL PRIMARY KEY,
     nome_cliente VARCHAR(120) NOT NULL,
-    cpf_cnpj VARCHAR(20) NOT NULL UNIQUE,
+    cpf_cnpj VARCHAR(14) NOT NULL UNIQUE,
     telefone VARCHAR(20) NOT NULL,
-    status_cliente VARCHAR(20) NOT NULL
+    status_cliente VARCHAR(20) NOT NULL,
+    CONSTRAINT ck_cliente_cpf_cnpj
+        CHECK (cpf_cnpj ~ '^([0-9]{11}|[0-9]{14})$'),
+    CONSTRAINT ck_cliente_status_cliente
+        CHECK (status_cliente IN ('ATIVO', 'INATIVO', 'INADIMPLENTE'))
 );
 
 CREATE TABLE IF NOT EXISTS planos (

@@ -17,7 +17,7 @@ O Nexus ERP Telecom é um sistema acadêmico desenvolvido para representar parte
 
 O sistema utiliza conceitos de Programação Orientada a Objetos em Python e realiza persistência de dados em um banco relacional PostgreSQL.
 
-A versão inicial implementa o CRUD completo da entidade **Cliente**, permitindo cadastrar, listar, buscar, editar e excluir clientes. Além disso, o projeto contém as demais entidades previstas no Modelo ER, como planos, contratos, faturas, ordens de serviço, funcionários e o relacionamento de atendimento entre funcionário e ordem de serviço.
+A versão atual implementa o CRUD da entidade **Cliente** e um fluxo simples de telecomunicações para abertura de ponto de instalação. Ao cadastrar um cliente novo ou abrir um novo ponto para um cliente ativo, o sistema cria automaticamente um contrato e uma ordem de serviço de instalação. Além disso, o projeto contém as demais entidades previstas no Modelo ER, como planos, contratos, faturas, ordens de serviço, funcionários e o relacionamento de atendimento entre funcionário e ordem de serviço.
 
 ## Tecnologias utilizadas
 
@@ -122,11 +122,12 @@ Após informar a senha correta, o sistema cria/verifica as tabelas e exibe o men
 
 ```text
 === Nexus ERP Telecom ===
-1 - Cadastrar cliente
+1 - Cadastrar cliente / novo ponto
 2 - Listar clientes
 3 - Buscar cliente por CPF/CNPJ
 4 - Editar cliente
 5 - Excluir cliente
+6 - Listar ordens de servico
 0 - Sair
 ```
 
@@ -157,21 +158,43 @@ Também é possível utilizar o Query Tool e executar:
 SELECT * FROM cliente;
 ```
 
-Se um cliente for cadastrado pelo menu do sistema, ele deverá aparecer na tabela `cliente`.
+Se um cliente for cadastrado pelo menu do sistema, ele deverá aparecer na tabela `cliente`. Para cada ponto aberto, também deverão aparecer registros em `contrato` e `os`.
+
+## Regras de negócio de telecom
+
+| Regra | Comportamento |
+|---|---|
+| CPF/CNPJ | O sistema remove máscara, rejeita letras e aceita somente CPF com 11 dígitos ou CNPJ com 14 dígitos |
+| Armazenamento do CPF/CNPJ | O valor é salvo somente com números |
+| Status no cadastro | O status não é digitado no cadastro de cliente novo |
+| Cliente novo | Todo cliente novo nasce com status `ATIVO` |
+| Status permitidos | O sistema aceita somente `ATIVO`, `INATIVO` e `INADIMPLENTE` |
+| Cliente ativo | Pode abrir novo ponto de instalação |
+| Cliente inadimplente | Não pode abrir novo ponto até regularizar a situação |
+| Cliente inativo | Não abre novo ponto automaticamente; o cadastro deve ser reativado antes |
+| Endereço de instalação | Fica em `contrato.end_instalacao`, não diretamente em `cliente` |
+| Novo ponto | Cada novo ponto gera um contrato e uma ordem de serviço de instalação automaticamente |
+
+Quando a opção `1 - Cadastrar cliente / novo ponto` é usada, o sistema primeiro solicita CPF/CNPJ. Se o cliente não existir, pede nome, telefone, plano e endereço de instalação, cria o cliente como `ATIVO`, cria o contrato com tempo de 12 meses e abre uma O.S. de instalação. Se o cliente já existir e estiver `ATIVO`, o sistema pergunta se deseja abrir um novo ponto. Clientes `INADIMPLENTE` ou `INATIVO` são bloqueados para novo ponto com mensagem clara.
 
 ## Funcionalidades implementadas
 
 | Funcionalidade | Situação |
 |---|---|
 | Cadastrar cliente | Implementado |
+| Cadastrar novo ponto para cliente ativo | Implementado |
 | Listar clientes | Implementado |
 | Buscar cliente por CPF/CNPJ | Implementado |
 | Editar cliente | Implementado |
 | Excluir cliente | Implementado |
-| Bloquear CPF/CNPJ duplicado | Implementado |
+| Validar CPF/CNPJ | Implementado |
+| Criar contrato automaticamente | Implementado |
+| Criar ordem de serviço de instalação automaticamente | Implementado |
+| Listar ordens de serviço | Implementado |
+| Seed simples de planos padrão | Implementado |
 | Criar tabelas automaticamente | Implementado |
 
-O CRUD completo foi implementado para a entidade **Cliente**, escolhida como entidade principal da versão inicial do sistema.
+O CRUD completo foi implementado para a entidade **Cliente**, escolhida como entidade principal do sistema. A abertura de ponto complementa o CRUD com uma regra de negócio típica de ERP de telecomunicações.
 
 ## Fundamentos de Programação Orientada a Objetos aplicados no projeto
 
@@ -271,8 +294,9 @@ class Cliente(Pessoa):
         super().__init__(nome_cliente)
         self.id_cliente = id_cliente
         self.__cpf_cnpj = None
+        self.__status_cliente = None
         self.cpf_cnpj = cpf_cnpj
-        self.telefone = telefone
+        self.atualizar_contato(telefone)
         self.status_cliente = status_cliente
 
     @property
@@ -281,9 +305,7 @@ class Cliente(Pessoa):
 
     @cpf_cnpj.setter
     def cpf_cnpj(self, valor):
-        if not valor or not valor.strip():
-            raise ValueError("CPF/CNPJ nao pode ser vazio.")
-        self.__cpf_cnpj = valor.strip()
+        self.__cpf_cnpj = self.normalizar_cpf_cnpj(valor)
 ```
 
 | Fundamento | Explicação |
@@ -332,10 +354,13 @@ Arquivo: `models/cliente.py`
 
 ```python
 def ativar(self):
-    self.status_cliente = "Ativo"
+    self.status_cliente = self.STATUS_ATIVO
 
 def inativar(self):
-    self.status_cliente = "Inativo"
+    self.status_cliente = self.STATUS_INATIVO
+
+def marcar_inadimplente(self):
+    self.status_cliente = self.STATUS_INADIMPLENTE
 
 def atualizar_contato(self, telefone):
     if not telefone or not telefone.strip():
@@ -354,19 +379,20 @@ def atualizar_contato(self, telefone):
 Arquivo: `services/cliente_service.py`
 
 ```python
-def cadastrar_cliente(self, nome_cliente, cpf_cnpj, telefone, status_cliente):
-    self._validar_campos_obrigatorios(nome_cliente, cpf_cnpj, telefone, status_cliente)
-
-    if self.cliente_repository.buscar_por_cpf_cnpj(cpf_cnpj):
+def cadastrar_cliente_com_ponto(self, nome_cliente, cpf_cnpj, telefone, id_planos, end_instalacao):
+    cpf_cnpj_normalizado = Cliente.normalizar_cpf_cnpj(cpf_cnpj)
+    if self.cliente_repository.buscar_por_cpf_cnpj(cpf_cnpj_normalizado):
         raise ValueError("Ja existe cliente cadastrado com este CPF/CNPJ.")
 
-    cliente = Cliente(nome_cliente, cpf_cnpj, telefone, status_cliente)
-    return self.cliente_repository.salvar(cliente)
+    cliente = Cliente(nome_cliente, cpf_cnpj_normalizado, telefone, Cliente.STATUS_ATIVO)
+    cliente = self.cliente_repository.salvar(cliente)
+    contrato, ordem_servico = self._abrir_ponto(cliente, id_planos, end_instalacao)
+    return cliente, contrato, ordem_servico
 ```
 
 | Fundamento | Explicação |
 |---|---|
-| Regra de negócio | O sistema não permite cadastrar dois clientes com o mesmo CPF/CNPJ. |
+| Regra de negócio | O sistema valida CPF/CNPJ, cria cliente novo como `ATIVO` e abre contrato/O.S. para o ponto de instalação. |
 | Separação de responsabilidade | A regra fica no `ClienteService`, e não diretamente no menu ou no banco. |
 | Justificativa | O service centraliza a lógica de negócio antes de enviar os dados para persistência. |
 

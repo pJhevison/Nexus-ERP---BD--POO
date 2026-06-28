@@ -2,6 +2,9 @@ import os
 
 from database.connection import criar_tabelas
 from repositories.cliente_repository import ClienteRepository
+from repositories.contrato_repository import ContratoRepository
+from repositories.ordem_servico_repository import OrdemServicoRepository
+from repositories.plano_repository import PlanoRepository
 from services.cliente_service import ClienteService
 from ui.menu import MenuPrincipal
 
@@ -30,7 +33,20 @@ def main():
         return
 
     cliente_repository = ClienteRepository()
-    cliente_service = ClienteService(cliente_repository)
+    plano_repository = PlanoRepository()
+    contrato_repository = ContratoRepository()
+    ordem_servico_repository = OrdemServicoRepository()
+
+    planos_inseridos = plano_repository.seed_planos_padrao()
+    if planos_inseridos:
+        print(f"{planos_inseridos} planos padrao cadastrados para demonstracao.")
+
+    cliente_service = ClienteService(
+        cliente_repository,
+        plano_repository,
+        contrato_repository,
+        ordem_servico_repository,
+    )
     menu = MenuPrincipal(cliente_service)
     menu.executar()
 

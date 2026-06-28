@@ -76,10 +76,44 @@ class ClienteRepository:
         return linhas_afetadas > 0
 
     def excluir_por_id(self, id_cliente):
-        sql = "DELETE FROM cliente WHERE id_cliente = %s"
         with obter_conexao() as conexao:
             with conexao.cursor() as cursor:
-                cursor.execute(sql, (id_cliente,))
+                cursor.execute(
+                    """
+                    DELETE FROM atende
+                    WHERE id_os IN (
+                        SELECT os.id_os
+                        FROM os
+                        INNER JOIN contrato ON contrato.id_contrato = os.idcontrato
+                        WHERE contrato.idcliente = %s
+                    )
+                    """,
+                    (id_cliente,),
+                )
+                cursor.execute(
+                    """
+                    DELETE FROM os
+                    WHERE idcontrato IN (
+                        SELECT id_contrato
+                        FROM contrato
+                        WHERE idcliente = %s
+                    )
+                    """,
+                    (id_cliente,),
+                )
+                cursor.execute(
+                    """
+                    DELETE FROM fatura
+                    WHERE idcontrato IN (
+                        SELECT id_contrato
+                        FROM contrato
+                        WHERE idcliente = %s
+                    )
+                    """,
+                    (id_cliente,),
+                )
+                cursor.execute("DELETE FROM contrato WHERE idcliente = %s", (id_cliente,))
+                cursor.execute("DELETE FROM cliente WHERE id_cliente = %s", (id_cliente,))
                 linhas_afetadas = cursor.rowcount
             conexao.commit()
         return linhas_afetadas > 0
