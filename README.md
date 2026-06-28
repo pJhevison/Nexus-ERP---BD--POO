@@ -127,7 +127,6 @@ Após informar a senha correta, o sistema cria/verifica as tabelas e exibe o men
 3 - Buscar cliente por CPF/CNPJ
 4 - Editar cliente
 5 - Excluir cliente
-6 - Demonstrar polimorfismo
 0 - Sair
 ```
 
@@ -170,7 +169,6 @@ Se um cliente for cadastrado pelo menu do sistema, ele deverá aparecer na tabel
 | Editar cliente | Implementado |
 | Excluir cliente | Implementado |
 | Bloquear CPF/CNPJ duplicado | Implementado |
-| Demonstrar polimorfismo | Implementado |
 | Criar tabelas automaticamente | Implementado |
 
 O CRUD completo foi implementado para a entidade **Cliente**, escolhida como entidade principal da versão inicial do sistema.
@@ -182,7 +180,7 @@ O CRUD completo foi implementado para a entidade **Cliente**, escolhida como ent
 | Classe abstrata | `Pessoa`, em `models/pessoa.py`, usando `ABC` e `@abstractmethod` |
 | Herança | `Cliente` e `Funcionario` herdam de `Pessoa` |
 | Encapsulamento | `Cliente` encapsula `cpf_cnpj`; `Plano` encapsula `valor_mensal`; `Fatura` encapsula `valor_fatura` |
-| Polimorfismo | O método `obter_identificacao()` é chamado em objetos `Cliente` e `Funcionario` |
+| Polimorfismo | `Cliente` e `Funcionario` implementam `obter_identificacao()` de formas diferentes. Esse fundamento técnico está aplicado no código, mas não é uma funcionalidade do menu do ERP |
 | Métodos de negócio | Métodos como `ativar`, `inativar`, `atualizar_contato`, `alterar_cargo`, `reajustar_valor` e `resolver` |
 | Representação textual | Classes principais implementam `__str__` |
 | Tratamento de exceções | O menu e a inicialização do sistema tratam erros de validação e conexão |
@@ -244,25 +242,24 @@ class Funcionario(Pessoa):
 
 ## Polimorfismo
 
-Arquivo: `ui/menu.py`
+Arquivos: `models/cliente.py` e `models/funcionario.py`
 
 ```python
-def _demonstrar_polimorfismo(self):
-    pessoas = [
-        Cliente("Maria Silva", "12345678900", "92999990000", "Ativo"),
-        Funcionario("Joao Souza", "Tecnico de campo"),
-    ]
+class Cliente(Pessoa):
+    def obter_identificacao(self):
+        return f"Cliente: {self.nome_cliente} - CPF/CNPJ: {self.cpf_cnpj}"
 
-    print("Mesmo metodo chamado em objetos Cliente e Funcionario:")
-    for pessoa in pessoas:
-        print(pessoa.obter_identificacao())
+
+class Funcionario(Pessoa):
+    def obter_identificacao(self):
+        return f"Funcionario: {self.nome} - Cargo: {self.cargo}"
 ```
 
 | Fundamento | Explicação |
 |---|---|
 | Polimorfismo | O mesmo método `obter_identificacao()` é chamado para objetos de classes diferentes. |
 | Comportamento diferente | Quando o objeto é `Cliente`, retorna dados do cliente. Quando é `Funcionario`, retorna dados do funcionário. |
-| Justificativa | O sistema consegue tratar objetos diferentes de forma uniforme, respeitando o contrato definido pela classe `Pessoa`. |
+| Justificativa | O sistema consegue tratar objetos diferentes de forma uniforme, respeitando o contrato definido pela classe `Pessoa`, sem transformar esse fundamento técnico em uma opção do menu. |
 
 ## Encapsulamento
 
